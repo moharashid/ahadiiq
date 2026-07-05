@@ -12,15 +12,11 @@ Rather than functioning as a traditional Contract Lifecycle Management (CLM) pla
 
 ## System Context
 
-> Replace with the exported System Context Diagram.
-
 ![System Context](images/System-Context-Diagram.jpg)
 
 ---
 
 ## AWS Architecture
-
-> Replace with the exported AWS Architecture Diagram.
 
 ![AWS Architecture](images/AHADI-ARCHITECTURE.jpg)
 
@@ -419,11 +415,9 @@ Cloud Infrastructure Engineer
 
 Building production-ready cloud-native systems using AWS, Terraform, Python, Docker, Kubernetes, and AI services.
 
-LinkedIn:
-(Add your LinkedIn)
+LinkedIn: https://www.linkedin.com/in/mohamud-rashid/
 
-GitHub:
-(Add your GitHub)
+GitHub: https://github.com/moharashid
 
 ---
 
