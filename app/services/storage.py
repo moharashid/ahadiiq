@@ -31,3 +31,4 @@ class LocalStorage(Storage):
         with open(file_path, 'rb') as f:
             return f.read()
         
+local_storage = LocalStorage(storage_dir="storage")
