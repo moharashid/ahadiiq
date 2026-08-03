@@ -5,13 +5,9 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from app.services.storage import local_storage
 from sqlalchemy.orm import Session
-from app.models.agreement import Agreement
-from app.models.user import User
-from app.models.tenant import Tenant
-from app.models.process_jobs import ProcessingJob
-
-DEV_TENANT_ID = "b809ec79-ae62-4f41-9479-bd307ebeaf5c"
-DEV_OWNER_ID = "530201ef-655a-4118-ab3f-687ce84b7865"
+from app import models 
+DEV_TENANT_ID = "f4cd81dd-afd4-4f3b-a636-9560dfd9c554"
+DEV_OWNER_ID = "8afdeb37-a7e7-4521-b527-99f1d88f4b8e"
 
 router = APIRouter()
 
@@ -25,7 +21,7 @@ async def upload_agreement(file: UploadFile, db: Session = Depends(get_db)):
     storage_key = local_storage.save(await file.read(), file.filename)
     
     try:
-        agreement = Agreement(
+        agreement = models.Agreement(
             filename=file.filename,
             storage_key=storage_key,
             status="uploaded",
@@ -35,7 +31,7 @@ async def upload_agreement(file: UploadFile, db: Session = Depends(get_db)):
         db.add(agreement)
         db.flush()
         
-        processing_job = ProcessingJob(
+        processing_job = models.ProcessingJob(
             agreement_id = agreement.id,
             tenant_id = agreement.tenant_id,
             status = "pending"     

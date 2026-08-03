@@ -6,10 +6,7 @@ from alembic import context
 
 from app.core.database import Base
 from app.core.config import settings
-from app.models.agreement import Agreement
-from app.models.tenant import Tenant
-from app.models.user import User
-from app.models.process_jobs import ProcessingJob
+from app import models  # Import your models to ensure they are registered with SQLAlchemy
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

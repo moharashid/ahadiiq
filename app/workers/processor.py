@@ -1,15 +1,13 @@
 import time
-from app.models.agreement import Agreement
-from app.models.tenant import Tenant
-from app.models.user import User
+from app import models 
 from app.core.database import SessionLocal
-from app.models.process_jobs import ProcessingJob
+
 import datetime
 
 while True:
     db = SessionLocal()
     try:
-        job = db.query(ProcessingJob).filter(ProcessingJob.status == "pending").first() 
+        job = db.query(models.ProcessingJob).filter(models.ProcessingJob.status == "pending").first() 
         if job:
             job.status = "processing"
             job.started_at = datetime.datetime.now().astimezone()
