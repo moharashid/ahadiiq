@@ -1,28 +1,25 @@
 import time
 from app import models 
 from app.core.database import SessionLocal
+from app.services.queue import database_queue
 
-import datetime
 
 while True:
     db = SessionLocal()
+    job = None
+    print("Checking for pending jobs...")
     try:
-        job = db.query(models.ProcessingJob).filter(models.ProcessingJob.status == "pending").first() 
-        if job:
-            job.status = "processing"
-            job.started_at = datetime.datetime.now().astimezone()
-            print(f"{job.id} processing")
-            db.commit()
+        job = database_queue.consume(db)
+        if job is not None:
+            print(f"Processing job {job.id} for agreement {job.agreement_id}")
             time.sleep(15)
-            job.status = "completed"
-            job.completed_at = datetime.datetime.now().astimezone()
-            print(f"{job.id} completed")
-            db.commit()
+            database_queue.acknowledge(db, job)
+            print(f"Completed processing job {job.id}")
         else:
-            print(f"No jobs for now")
-            time.sleep(5) 
-    
+            print("No pending jobs found. Waiting for new jobs...")
+            time.sleep(5)
     except Exception as e:
+        print(f"Error occurred while processing job: {str(e)}")
         db.rollback()
         print(f"{str(e)}") 
         if job:
