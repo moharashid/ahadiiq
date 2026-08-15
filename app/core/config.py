@@ -7,10 +7,12 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_USER:str
-    
+    S3_BUCKET_NAME: str 
     @property
     def db_url(self):
        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}" 
-        
+    @property
+    def s3_bucket_name(self):
+        return self.S3_BUCKET_NAME
+  
 settings = Settings()
-

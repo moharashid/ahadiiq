@@ -3,7 +3,7 @@ from sqlalchemy import text
 from app.core.database import get_db
 from sqlalchemy.orm import Session
 from typing import Annotated
-from app.services.storage import local_storage
+from app.services.storage import local_storage, s3_storage
 from sqlalchemy.orm import Session
 from app import models 
 from app.services.queue import database_queue
@@ -19,7 +19,7 @@ async def upload_agreement(file: UploadFile, db: Session = Depends(get_db)):
     
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF files are allowed.")
-    storage_key = local_storage.save(await file.read(), file.filename)
+    storage_key = s3_storage.save(await file.read(), file.filename)
     
     try:
         agreement = models.Agreement(

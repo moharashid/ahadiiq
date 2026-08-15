@@ -7,3 +7,10 @@ __pycache__/
 status.txt
 storage/
 uploads/
+test_boto3.py
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
