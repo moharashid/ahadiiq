@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from app.core.config import settings
 import boto3
 import logging
 import time
@@ -59,12 +60,14 @@ class TextractOCR(OCRService):
             # phase 3b: pull the actual text out of the LINE blocks
             lines = [b['Text'] for b in blocks if b['BlockType'] == 'LINE']
             text = "\n".join(lines) 
-            return text              
+            result = {
+                "job_id": job_id,
+                "text": text
+            }
+            return result              
         except Exception as e:
             logger.error(f"Error occurred while extracting text from S3 object {key}: {e}")
             raise
         
-    
 
-   
-   
+textract_ocr_service = TextractOCR(bucket_name=settings.s3_bucket_name)
