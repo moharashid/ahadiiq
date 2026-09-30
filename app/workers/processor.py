@@ -4,7 +4,9 @@ from app.core.database import SessionLocal
 from app.services.queue import database_queue
 from app.services.ocr import textract_ocr_service
 from app.services.extractor import anthropic_extractor
+from app.services.validator import validator
 from datetime import date
+
 
 def parse_date(value):
     return date.fromisoformat(value) if value else None
@@ -66,7 +68,15 @@ while True:
                 db.add(clause_record)
             db.commit()  # persist the clauses explicitly and the structured data to agreements explicitly
             
-            # 8. mark the job as completed in the queue
+            # 8. validate the clauses and update their status
+            clauses = db.query(models.Clause).filter(models.Clause.agreement_id == job.agreement_id).all()
+            # for clause in clauses:
+            #     clause_validation_check = validator.validate_clause(clause, extracted_text)
+            #     print(clause_validation_check)
+            agreement_status = validator.validate_agreement(agreement, clauses, extracted_text)
+            db.commit()  # persist the validation results explicitly
+            
+            # 9. mark the job as completed in the queue
             database_queue.acknowledge(db, job)
             print(f"Completed processing job {job.id}")
         else:
