@@ -6,6 +6,7 @@ from app.services.ocr import textract_ocr_service
 from app.services.extractor import anthropic_extractor
 from app.services.validator import validator
 from datetime import date
+from app.services.obligation_service import obligation_service
 
 
 def parse_date(value):
@@ -76,7 +77,14 @@ while True:
             agreement_status = validator.validate_agreement(agreement, clauses, extracted_text)
             db.commit()  # persist the validation results explicitly
             
-            # 9. mark the job as completed in the queue
+            # 9. generate obligations based on the validated clauses and update the database
+            Validated_clauses = db.query(models.Clause).filter(models.Clause.agreement_id == job.agreement_id).all()
+            obligations = obligation_service.generate_obligations(Validated_clauses, agreement)
+            
+            for obligation in obligations:
+                db.add(obligation)
+            db.commit()
+            # 10. mark the job as completed in the queue
             database_queue.acknowledge(db, job)
             print(f"Completed processing job {job.id}")
         else:
