@@ -8,7 +8,7 @@ class Obligation(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
     agreement_id = Column(UUID(as_uuid=True), ForeignKey("agreements.id"), nullable=False)
     tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
-    clause_id = Column(UUID(as_uuid=True), ForeignKey("clauses.id"), nullable=False)
+    clause_id = Column(UUID(as_uuid=True), ForeignKey("clauses.id"), nullable=True)
     obligation_type = Column(String(50), nullable=False)
     status = Column(String(50), nullable=False, default="pending")
     due_date = Column(Date, nullable=True)
