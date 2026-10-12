@@ -1,5 +1,5 @@
 from app.core.database import Base
-from sqlalchemy import Column, String, DateTime, func, ForeignKey,Date
+from sqlalchemy import Column, String, DateTime, func, ForeignKey,Date, Integer
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 import uuid
 
@@ -16,6 +16,8 @@ class Agreement(Base):
     upload_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     parties = Column(JSONB, nullable=True)
     signatories = Column(JSONB, nullable=True)
+    risk_score = Column(Integer, nullable=True)
+    risk_level = Column(String(50), nullable=True)
     effective_date = Column(Date, nullable=True)
     expiry_date = Column(Date, nullable=True)
     

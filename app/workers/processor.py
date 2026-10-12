@@ -7,6 +7,7 @@ from app.services.extractor import anthropic_extractor
 from app.services.validator import validator
 from datetime import date
 from app.services.obligation_service import obligation_service
+from app.services.risk_service import risk_service 
 
 
 def parse_date(value):
@@ -84,7 +85,14 @@ while True:
             for obligation in obligations:
                 db.add(obligation)
             db.commit()
-            # 10. mark the job as completed in the queue
+            
+            # 10. assess risks based on the validated clauses and update the agreement record
+            risks = risk_service.assess_agreement(agreement, Validated_clauses)
+            for risk in risks:
+                db.add(risk)
+            db.commit()  # persist the risk assessment results explicitly
+            
+            # 11. mark the job as completed in the queue
             database_queue.acknowledge(db, job)
             print(f"Completed processing job {job.id}")
         else:
