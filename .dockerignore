@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+
+# Virtual environment — never in the image, deps come from requirements.txt
+venv/
+.venv/
+env/
+
+# Secrets — MUST be excluded
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# Local data / runtime files
+*.sqlite
+*.db
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Docs / misc not needed at runtime
+*.md
+scripts/seed.py
