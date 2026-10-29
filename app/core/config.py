@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_USER:str
     S3_BUCKET_NAME: str 
-    ANTHROPIC_API_KEY: str
+    ANTHROPIC_API_KEY: str | None = None
     @property
     def db_url(self):
        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}" 

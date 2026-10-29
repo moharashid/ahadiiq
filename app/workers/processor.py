@@ -1,7 +1,7 @@
 import time
 from app import models 
 from app.core.database import SessionLocal
-from app.services.queue import database_queue
+from app.services.queue import database_queue, sqs_queue
 from app.services.ocr import textract_ocr_service
 from app.services.extractor import anthropic_extractor
 from app.services.validator import validator
@@ -19,7 +19,7 @@ while True:
     print("Checking for pending jobs...")
     try:
         #1. consume a job from the queue  
-        job = database_queue.consume(db)
+        job = sqs_queue.consume(db)
         if job is not None:
             print(f"Processing job {job.id} for agreement {job.agreement_id}")
             
@@ -93,11 +93,10 @@ while True:
             db.commit()  # persist the risk assessment results explicitly
             
             # 11. mark the job as completed in the queue
-            database_queue.acknowledge(db, job)
+            sqs_queue.acknowledge(db, job)
             print(f"Completed processing job {job.id}")
         else:
             print("No pending jobs found. Waiting for new jobs...")
-            time.sleep(5)
     except Exception as e:
         print(f"Error occurred while processing job: {str(e)}")
         db.rollback()
