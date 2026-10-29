@@ -41,3 +41,5 @@ Dockerfile
 # Docs / misc not needed at runtime
 *.md
 scripts/seed.py
+
+file*

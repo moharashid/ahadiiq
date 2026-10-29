@@ -14,3 +14,4 @@ test_boto3.py
 *.tfstate.*
 *.tfvars
 crash.log
+file*

@@ -28,3 +28,6 @@ output "sqs_queue_url" {
 output "sqs_queue_arn" {
   value = module.sqs.queue_arn
 }
+output "alb_dns_name" {
+  value = module.alb.dns_name
+}
