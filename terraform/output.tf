@@ -31,3 +31,13 @@ output "sqs_queue_arn" {
 output "alb_dns_name" {
   value = module.alb.dns_name
 }
+output "cognito_user_pool_id" { value = aws_cognito_user_pool.user_pool.id }
+output "cognito_client_id"    { value = aws_cognito_user_pool_client.pool_client.id }
+output "cognito_client_secret" {
+  value     = aws_cognito_user_pool_client.pool_client.client_secret
+  sensitive = true
+}
+output "cognito_domain" { value = aws_cognito_user_pool_domain.pool_domain.domain }
+output "cognito_issuer" {
+  value = "https://cognito-idp.${data.aws_region.current.region}.amazonaws.com/${aws_cognito_user_pool.user_pool.id}"
+}

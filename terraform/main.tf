@@ -387,3 +387,63 @@ resource "aws_kms_alias" "rds" {
   name          = "alias/ahadiiq-rds"
   target_key_id = aws_kms_key.rds.key_id
 }
+
+resource "aws_cognito_user_pool" "user_pool" {
+  name = "ahadiiq-user-pool"
+  username_attributes = ["email"]
+  auto_verified_attributes = ["email"]
+  mfa_configuration = "OPTIONAL"
+  software_token_mfa_configuration {
+    enabled = true 
+  }
+  user_pool_add_ons {
+    advanced_security_mode = "AUDIT"
+  }
+  
+  password_policy {
+    minimum_length    = 12
+    require_lowercase = true
+    require_numbers   = true
+    require_symbols   = true
+    require_uppercase = true
+  }
+  account_recovery_setting {
+    recovery_mechanism {
+      name ="verified_email"
+      priority =1
+    }
+
+  }
+  
+}
+
+resource "aws_cognito_user_pool_client" "pool_client"{
+  name="ahadiiq-user-pool-client"
+  user_pool_id = aws_cognito_user_pool.user_pool.id
+  allowed_oauth_flows = ["code"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_scopes = ["email", "openid", "profile"]
+  callback_urls = ["http://localhost:8000/auth/callback"]
+  logout_urls = ["http://localhost:8000/auth/logout"]
+  supported_identity_providers = ["COGNITO"]
+  generate_secret = true
+  access_token_validity  = 1
+  id_token_validity      = 1
+  refresh_token_validity = 30
+  token_validity_units {
+    access_token  = "hours"
+    id_token      = "hours"
+    refresh_token = "days" 
+  }
+  prevent_user_existence_errors = "ENABLED"
+  enable_token_revocation = true
+  explicit_auth_flows = [
+  "ALLOW_USER_SRP_AUTH",            # secure password auth (SRP, no plaintext)
+  "ALLOW_REFRESH_TOKEN_AUTH",       # needed to use refresh tokens
+  "ALLOW_ADMIN_USER_PASSWORD_AUTH", # convenience: lets you grab a test token via CLI
+]
+}
+resource "aws_cognito_user_pool_domain" "pool_domain"{
+  domain = "ahadiiq-auth"
+  user_pool_id = aws_cognito_user_pool.user_pool.id
+}
