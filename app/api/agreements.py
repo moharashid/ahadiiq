@@ -6,7 +6,8 @@ from typing import Annotated
 from app.services.storage import local_storage, s3_storage
 from sqlalchemy.orm import Session
 from app import models 
-from app.services.queue import database_queue, sqs_queue
+from app.services.queue import database_queue
+# from app.services.queue import database_queue, sqs_queue
 DEV_TENANT_ID = "f4cd81dd-afd4-4f3b-a636-9560dfd9c554"
 DEV_OWNER_ID = "8afdeb37-a7e7-4521-b527-99f1d88f4b8e"
 
@@ -39,7 +40,7 @@ async def upload_agreement(file: UploadFile, db: Session = Depends(get_db)):
 
     # 2) queue it — enqueue owns its own commit/rollback for the JOB only
     try:
-        sqs_queue.enqueue(db, agreement_id=agreement.id, tenant_id=DEV_TENANT_ID)
+        database_queue.enqueue(db, agreement_id=agreement.id, tenant_id=DEV_TENANT_ID)
     except Exception as e:
         # agreement is saved; only queueing failed — surface it honestly
         raise HTTPException(status_code=502, detail=f"Agreement saved but queueing failed: {e}")

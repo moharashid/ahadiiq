@@ -6,3 +6,4 @@ from app.models.extracted_text import ExtractedText
 from app.models.clauses import Clause
 from app.models.obligation import Obligation
 from app.models.risk import Risk
+from app.models.invitation import Invitation

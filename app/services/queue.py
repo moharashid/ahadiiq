@@ -100,4 +100,4 @@ class SQSQueue(Queue):
         db.commit()
         return job    
 database_queue = DatabaseQueue()
-sqs_queue = SQSQueue(queue_url=os.environ["QUEUE_URL"])
+# sqs_queue = SQSQueue(queue_url=os.environ["QUEUE_URL"])

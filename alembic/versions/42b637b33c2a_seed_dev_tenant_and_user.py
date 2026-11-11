@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.bulk_insert(
         sa.table("tenants", sa.column("id", UUID), sa.column("name", sa.String)),
-        [{"id": "f4cd81dd-afd4-4f3b-a636-9560dfd9c554", "name": "Dev Tenant"}],
+        [{"id": "f4cd81de-afd4-4f3b-a636-9560dfd9c554", "name": "Dev Tenant"}],
     )
     op.bulk_insert(
         sa.table("users",
@@ -29,9 +29,9 @@ def upgrade() -> None:
             sa.column("tenant_id", UUID), sa.column("hashed_password", sa.String), sa.column("role", sa.String)
         ),
         [{
-            "id": "8afdeb37-a7e7-4521-b527-99f1d88f4b8e",
+            "id": "8afdeb38-a7e7-4521-b527-99f1d88f4b8e",
             "email": "dev@ahadiiq.local",
-            "tenant_id": "f4cd81dd-afd4-4f3b-a636-9560dfd9c554",
+            "tenant_id": "f4cd81de-afd4-4f3b-a636-9560dfd9c554",
             "hashed_password": "dev-placeholder",
             "role": "manager"
         }],

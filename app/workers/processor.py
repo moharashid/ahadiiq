@@ -19,7 +19,7 @@ while True:
     print("Checking for pending jobs...")
     try:
         #1. consume a job from the queue  
-        job = sqs_queue.consume(db)
+        job = database_queue.consume(db)
         if job is not None:
             print(f"Processing job {job.id} for agreement {job.agreement_id}")
             
@@ -93,7 +93,7 @@ while True:
             db.commit()  # persist the risk assessment results explicitly
             
             # 11. mark the job as completed in the queue
-            sqs_queue.acknowledge(db, job)
+            database_queue.acknowledge(db, job)
             print(f"Completed processing job {job.id}")
         else:
             print("No pending jobs found. Waiting for new jobs...")
