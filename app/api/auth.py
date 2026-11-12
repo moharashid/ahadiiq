@@ -9,8 +9,10 @@ from fastapi.responses import RedirectResponse
 from app.core.config import settings   # add cognito URI from Terraform to settings object
 from app.core.database import get_db
 from sqlalchemy.orm import Session
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from app import models
+from app.schemas.invite_schema import InvitationCreate
+
 router = APIRouter()
 
 # ───────── HELPERS (plain functions, called by routes) ─────────
@@ -46,6 +48,22 @@ def get_token_claims(request: Request) -> dict:
         raise HTTPException(status_code=401, detail="Wrong client")
 
     return claims
+
+def get_current_user(
+    claims: dict = Depends(get_token_claims),
+    db: Session = Depends(get_db),
+) -> models.User:
+    user = db.query(models.User).filter_by(cognito_sub=claims["sub"]).first()
+    if user is None:
+        raise HTTPException(403, "User not onboarded")
+    return user
+
+def require_role(*allowed_roles: str):
+    def checker(user: models.User = Depends(get_current_user)) -> models.User:
+        if user.role not in allowed_roles:
+            raise HTTPException(403, "Insufficient permissions")
+        return user
+    return checker
 
 def onboard_user(db, sub, email, request) -> models.User:
     token = request.cookies.get("invite_token")
@@ -88,7 +106,7 @@ def login():
         f"https://{settings.cognito_domain}.auth.us-east-1.amazoncognito.com"
         f"/oauth2/authorize?{urlencode(params)}"
     )
-
+    print(authorize_url)
     response = RedirectResponse(authorize_url, status_code=307)
     response.set_cookie("oauth_state", state, httponly=True, max_age=300, samesite="lax")
     return response
@@ -131,19 +149,21 @@ def callback(request: Request, code: str, state: str, db: Session = Depends(get_
     # These tokens came straight from Cognito over TLS, so reading them is safe here.
     claims = jwt.decode(tokens["id_token"], options={"verify_signature": False})
     sub, email = claims["sub"], claims["email"]
-
+    print("LOGIN SUB:", sub)
     user = db.query(models.User).filter_by(cognito_sub=sub).first()
     if user is None:
-        user = onboard_user(db, sub, email, request)   # consume invite or 403
+        user = onboard_user(db, sub, email, request)
 
     response = RedirectResponse("/", status_code=307)
-    # ... your existing set_cookie calls for the three tokens ...
+    response.set_cookie("access_token",  tokens["access_token"],
+                        httponly=True, secure=False, samesite="lax", max_age=tokens["expires_in"])
+    response.set_cookie("id_token",      tokens["id_token"],
+                        httponly=True, secure=False, samesite="lax", max_age=tokens["expires_in"])
+    response.set_cookie("refresh_token", tokens["refresh_token"],
+                        httponly=True, secure=False, samesite="lax", max_age=30*24*3600)
     response.delete_cookie("oauth_state")
     response.delete_cookie("invite_token")
     return response
-
-
-
 
 
 @router.get("/auth/me")
@@ -156,3 +176,26 @@ def invite(token: str):
     response = RedirectResponse("/auth/login", status_code=307)
     response.set_cookie("invite_token", token, httponly=True, max_age=600, samesite="lax")
     return response
+
+@router.post("/invitations")
+def create_invitation(
+    body: InvitationCreate,
+    admin: models.User = Depends(require_role("admin")),
+    db: Session = Depends(get_db),
+):
+    if body.role not in ("admin", "member"):
+        raise HTTPException(400, "Invalid role")
+
+    invite = models.Invitation(
+        token=secrets.token_urlsafe(32),
+        email=body.email,
+        tenant_id=admin.tenant_id,        # ← THE line. Forced to the admin's own tenant.
+        role=body.role,
+        status="pending",
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+        created_by=admin.id,
+    )
+    db.add(invite)
+    db.commit()
+    db.refresh(invite)
+    return {"invite_link": f"http://localhost:8000/auth/invite?token={invite.token}"}

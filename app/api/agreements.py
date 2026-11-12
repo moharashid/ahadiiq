@@ -7,6 +7,7 @@ from app.services.storage import local_storage, s3_storage
 from sqlalchemy.orm import Session
 from app import models 
 from app.services.queue import database_queue
+from app.api.auth import get_current_user
 # from app.services.queue import database_queue, sqs_queue
 DEV_TENANT_ID = "f4cd81dd-afd4-4f3b-a636-9560dfd9c554"
 DEV_OWNER_ID = "8afdeb37-a7e7-4521-b527-99f1d88f4b8e"
@@ -52,5 +53,16 @@ async def upload_agreement(file: UploadFile, db: Session = Depends(get_db)):
         "storage_key": agreement.storage_key,
     }
         
-    
-            
+@router.get("/agreements")
+def list_agreements(
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    query = db.query(models.Agreement).filter(
+        models.Agreement.tenant_id == user.tenant_id      # Layer 1: always
+    )
+    if user.role != "admin":
+        query = query.filter(
+            models.Agreement.owner_id == user.id          # Layer 2: members only
+        )
+    return query.all()
