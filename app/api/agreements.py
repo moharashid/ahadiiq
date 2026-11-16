@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app import models 
 from app.services.queue import database_queue
 from app.api.auth import get_current_user
+import uuid
 # from app.services.queue import database_queue, sqs_queue
 DEV_TENANT_ID = "f4cd81dd-afd4-4f3b-a636-9560dfd9c554"
 DEV_OWNER_ID = "8afdeb37-a7e7-4521-b527-99f1d88f4b8e"
@@ -66,3 +67,16 @@ def list_agreements(
             models.Agreement.owner_id == user.id          # Layer 2: members only
         )
     return query.all()
+@router.get("/agreements/{agreement_id}")
+def get_agreement(agreement_id,
+                  user: models.User = Depends(get_current_user),
+                  db: Session = Depends(get_db)):
+    q = db.query(models.Agreement).filter(
+        models.Agreement.id == agreement_id,
+        models.Agreement.tenant_id == user.tenant_id)
+    if user.role != "admin":
+        q = q.filter(models.Agreement.owner_id == user.id)
+    agreement = q.first()
+    if agreement is None:
+        raise HTTPException(404, "Agreement not found")
+    return agreement
