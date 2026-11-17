@@ -9,6 +9,8 @@ from app import models
 from app.services.queue import database_queue
 from app.api.auth import get_current_user
 import uuid
+from typing import List
+from app.schemas.agreement import AgreementOut
 # from app.services.queue import database_queue, sqs_queue
 DEV_TENANT_ID = "f4cd81dd-afd4-4f3b-a636-9560dfd9c554"
 DEV_OWNER_ID = "8afdeb37-a7e7-4521-b527-99f1d88f4b8e"
@@ -54,7 +56,7 @@ async def upload_agreement(file: UploadFile, db: Session = Depends(get_db)):
         "storage_key": agreement.storage_key,
     }
         
-@router.get("/agreements")
+@router.get("/agreements", response_model=List[AgreementOut])
 def list_agreements(
     user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -67,7 +69,7 @@ def list_agreements(
             models.Agreement.owner_id == user.id          # Layer 2: members only
         )
     return query.all()
-@router.get("/agreements/{agreement_id}")
+@router.get("/agreements/{agreement_id}", response_model=AgreementOut)
 def get_agreement(agreement_id,
                   user: models.User = Depends(get_current_user),
                   db: Session = Depends(get_db)):

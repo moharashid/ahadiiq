@@ -154,7 +154,7 @@ def callback(request: Request, code: str, state: str, db: Session = Depends(get_
     if user is None:
         user = onboard_user(db, sub, email, request)
 
-    response = RedirectResponse("/", status_code=307)
+    response = RedirectResponse("/dashboard", status_code=307)
     response.set_cookie("access_token",  tokens["access_token"],
                         httponly=True, secure=False, samesite="lax", max_age=tokens["expires_in"])
     response.set_cookie("id_token",      tokens["id_token"],
@@ -163,6 +163,7 @@ def callback(request: Request, code: str, state: str, db: Session = Depends(get_
                         httponly=True, secure=False, samesite="lax", max_age=30*24*3600)
     response.delete_cookie("oauth_state")
     response.delete_cookie("invite_token")
+    
     return response
 
 
@@ -199,3 +200,11 @@ def create_invitation(
     db.commit()
     db.refresh(invite)
     return {"invite_link": f"http://localhost:8000/auth/invite?token={invite.token}"}
+
+@router.get("/auth/logout")
+def logout():
+    response = RedirectResponse("/auth/login", status_code=307)
+    response.delete_cookie("access_token")
+    response.delete_cookie("id_token")
+    response.delete_cookie("refresh_token")
+    return response

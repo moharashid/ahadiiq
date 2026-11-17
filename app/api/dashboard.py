@@ -7,6 +7,8 @@ from app.core.database import get_db
 from app.api.auth import get_current_user
 from app import models
 from app.schemas.dashboard_schema import ObligationOut, RiskOut
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 router = APIRouter()
 
 # --- 1. SUMMARY (the top tiles) ---
