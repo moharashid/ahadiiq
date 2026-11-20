@@ -1,7 +1,8 @@
 import time
 from app import models 
 from app.core.database import SessionLocal
-from app.services.queue import database_queue, sqs_queue
+from app.services.queue import database_queue 
+# from app.services.queue import sqs_queue
 from app.services.ocr import textract_ocr_service
 from app.services.extractor import anthropic_extractor
 from app.services.validator import validator

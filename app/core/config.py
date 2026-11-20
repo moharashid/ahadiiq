@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_USER:str
     S3_BUCKET_NAME: str 
+    REGION: str
     ANTHROPIC_API_KEY: str | None = None
     COGNITO_CLIENT_ID: str | None = None
     COGNITO_REDIRECT_URI: str | None = None
@@ -43,5 +44,8 @@ class Settings(BaseSettings):
     @property
     def cognito_user_pool_id(self):
         return self.COGNITO_USER_POOL_ID
+    @property
+    def aws_region(self):
+        return self.REGION
 settings = Settings()
 

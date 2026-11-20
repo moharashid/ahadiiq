@@ -103,7 +103,7 @@ def login():
     }
 
     authorize_url = (
-        f"https://{settings.cognito_domain}.auth.us-east-1.amazoncognito.com"
+        f"https://{settings.cognito_domain}.auth.{settings.cognito_region}.amazoncognito.com"
         f"/oauth2/authorize?{urlencode(params)}"
     )
     print(authorize_url)
@@ -128,19 +128,23 @@ def callback(request: Request, code: str, state: str, db: Session = Depends(get_
         f"{settings.cognito_client_id}:{settings.cognito_client_secret}".encode()
     ).decode()
 
-    resp = httpx.post(
-        token_url,
-        data={
-            "grant_type":   "authorization_code",
-            "client_id":    settings.cognito_client_id,
-            "code":         code,
-            "redirect_uri": settings.cognito_redirect_uri,
-        },
-        headers={
-            "Content-Type":  "application/x-www-form-urlencoded",
-            "Authorization": f"Basic {basic}",
-        },
-    )
+    try:
+        resp = httpx.post(
+            token_url,
+            data={
+                "grant_type":   "authorization_code",
+                "client_id":    settings.cognito_client_id,
+                "code":         code,
+                "redirect_uri": settings.cognito_redirect_uri,
+            },
+            headers={
+                "Content-Type":  "application/x-www-form-urlencoded",
+                "Authorization": f"Basic {basic}",
+            },
+            timeout=10.0,                       # give Cognito a bit longer
+        )
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Login timed out reaching Cognito. Please try again.")
     if resp.status_code != 200:
         raise HTTPException(status_code=400, detail=f"Token exchange failed: {resp.text}")
 
@@ -203,7 +207,12 @@ def create_invitation(
 
 @router.get("/auth/logout")
 def logout():
-    response = RedirectResponse("/auth/login", status_code=307)
+    logout_url = (
+        f"https://{settings.cognito_domain}.auth.{settings.cognito_region}.amazoncognito.com/logout"
+        f"?client_id={settings.cognito_client_id}"
+        f"&logout_uri=http://localhost:8000/auth/login"
+    )
+    response = RedirectResponse(logout_url, status_code=307)
     response.delete_cookie("access_token")
     response.delete_cookie("id_token")
     response.delete_cookie("refresh_token")

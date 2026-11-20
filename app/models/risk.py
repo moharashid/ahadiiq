@@ -11,6 +11,7 @@ class Risk(Base):
     clause_id = Column(UUID(as_uuid=True), ForeignKey("clauses.id"), nullable=True)
     risk_type = Column(String(50), nullable=False)
     severity = Column(Integer, nullable=False)
+    status = Column(String(50), nullable=True, default="active")
     description = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     
