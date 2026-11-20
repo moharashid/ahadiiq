@@ -423,8 +423,15 @@ resource "aws_cognito_user_pool_client" "pool_client"{
   allowed_oauth_flows = ["code"]
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_scopes = ["email", "openid", "profile"]
-  callback_urls = ["http://localhost:8000/auth/callback"]
-  logout_urls = ["http://localhost:8000/auth/logout"]
+  callback_urls = [
+  "http://localhost:8000/auth/callback",
+  "https://app.ahadiiq.com/auth/callback",
+]
+logout_urls = [
+  "http://localhost:8000/auth/login",
+  "https://app.ahadiiq.com/auth/login",
+]
+  
   supported_identity_providers = ["COGNITO"]
   generate_secret = true
   access_token_validity  = 1
